@@ -28,17 +28,17 @@ public class PurchaseController {
     }
 
     @GetMapping(value = "/{purchaseId}")
-    public Purchase getProduct(@PathVariable Long purchaseId){
+    public Purchase getPurchase(@PathVariable Long purchaseId){
         return this.purchaseService.getPurchase(purchaseId);
     }
 
     @PutMapping(value = "/{purchaseId}")
-    public Purchase updateProduct(@PathVariable Long purchaseId, @RequestBody Purchase purchase){
+    public Purchase updatePurchase(@PathVariable Long purchaseId, @RequestBody Purchase purchase){
         return this.purchaseService.updatePurchase(purchaseId, purchase);
     }
 
     @PostMapping
-    public Purchase saveProduct(@RequestBody Purchase purchase){
+    public Purchase savePurchase(@RequestBody Purchase purchase){
         return this.purchaseService.savePurchase(purchase);
     }
 

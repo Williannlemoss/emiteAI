@@ -14,22 +14,15 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "purchase")
-public class Purchase {
+@Entity(name = "transportOrder")
+public class TransportOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
-    private List<Product> productList = new ArrayList<>();
-
-    private Double totalOrderAmount;
-
-    private Boolean isSent;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private TransportOrder transportOrder;
+    @OneToMany(mappedBy = "transportOrder", cascade = CascadeType.ALL)
+    private List<Purchase> purchaseList = new ArrayList<>();
 
     private LocalDateTime createdAt;
 
@@ -43,10 +36,5 @@ public class Purchase {
     @PreUpdate
     public void preUpdate(){
         this.updatedAt = LocalDateTime.now();
-    }
-
-    @Override
-    public String toString(){
-        return "meu ID" + this.getId();
     }
 }
