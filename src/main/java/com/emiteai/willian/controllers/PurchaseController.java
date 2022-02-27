@@ -1,5 +1,7 @@
 package com.emiteai.willian.controllers;
 
+import com.emiteai.willian.dto.request.PurchaseSaveDTO;
+import com.emiteai.willian.dto.response.PurchaseDTO;
 import com.emiteai.willian.models.Product;
 import com.emiteai.willian.utils.ProductExelExport;
 import com.emiteai.willian.models.Purchase;
@@ -23,12 +25,12 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
     @GetMapping
-    public List<Purchase> getPurchase(){
+    public List<PurchaseDTO> getPurchase(){
         return purchaseService.getAllPurchase();
     }
 
     @GetMapping(value = "/{purchaseId}")
-    public Purchase getProduct(@PathVariable Long purchaseId){
+    public PurchaseDTO getProduct(@PathVariable Long purchaseId){
         return this.purchaseService.getPurchase(purchaseId);
     }
 
@@ -38,7 +40,7 @@ public class PurchaseController {
     }
 
     @PostMapping
-    public Purchase saveProduct(@RequestBody Purchase purchase){
+    public PurchaseDTO saveProduct(@RequestBody PurchaseSaveDTO purchase){
         return this.purchaseService.savePurchase(purchase);
     }
 
@@ -47,26 +49,8 @@ public class PurchaseController {
         return this.purchaseService.deletePurchase(purchaseId);
     }
 
-    @GetMapping(value = "exel/{purchaseId}")
-    public void exportToExel(@PathVariable Long purchaseId, HttpServletResponse response) throws IOException {
-        Purchase purchase = this.purchaseService.getPurchase(purchaseId);
-
-        if (purchase.getTotalOrderAmount() >= 500){
-            response.setContentType("application/octet-stream");
-            String headerKey = "Content-Disposition";
-
-            DateFormat dateFormat = new SimpleDateFormat("_dd-MM-yyyy_HH");
-            String currentDateTime = dateFormat.format(new Date());
-
-            String headerValue = "attachement; filename=purchase_" + purchaseId + currentDateTime  +".xlsx";
-
-            response.setHeader(headerKey,headerValue);
-
-            List<Product> productList = this.purchaseService.getPurchase(purchaseId).getProductList();
-
-            ProductExelExport productExelExport = new ProductExelExport(purchase.getProductList());
-
-            productExelExport.export(response);
-        }
+    @GetMapping(value = "/excel/{purchaseId}")
+    public ResponseEntity<Void> exportToExel(@PathVariable Long purchaseId, HttpServletResponse response) throws IOException {
+      return this.purchaseService.exportToExel(purchaseId, response);
     }
 }

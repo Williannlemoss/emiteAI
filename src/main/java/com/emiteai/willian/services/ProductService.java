@@ -1,5 +1,8 @@
 package com.emiteai.willian.services;
 
+import com.emiteai.willian.dto.request.ProductPutDTO;
+import com.emiteai.willian.dto.request.ProductSaveDTO;
+import com.emiteai.willian.dto.response.ProductDTO;
 import com.emiteai.willian.models.Product;
 import org.springframework.http.ResponseEntity;
 
@@ -7,14 +10,16 @@ import java.util.List;
 
 public interface ProductService {
 
-    List<Product> getAllProduct();
+    List<ProductDTO> getAllProduct();
 
-    Product getProduct(Long id);
+    ProductDTO getProduct(Long id);
 
-    Product saveProduct(Product product);
+    ProductDTO saveProduct(ProductSaveDTO product);
 
-    Product updateProduct(Long id, Product product);
+    Product updateProduct(Long id, ProductPutDTO product);
 
     ResponseEntity<Void> deleteProduct(Long id);
+
+
 
 }
