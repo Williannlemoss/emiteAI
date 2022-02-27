@@ -7,24 +7,26 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "product")
-public class Product {
+@Entity(name = "purchase")
+public class Purchase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
+    private List<Product> productList = new ArrayList<>();
 
-    private Double price;
+    private Double totalOrderAmount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Purchase purchase;
+    private Boolean isSent;
 
     private LocalDateTime createdAt;
 
