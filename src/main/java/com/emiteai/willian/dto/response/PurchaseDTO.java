@@ -22,9 +22,7 @@ public class PurchaseDTO {
     private Long id;
 
     private List<ProductDTO> productList = new ArrayList<>();
-
     private Double totalOrderAmount;
-
     private Boolean isSent;
 
     private LocalDateTime createdAt;

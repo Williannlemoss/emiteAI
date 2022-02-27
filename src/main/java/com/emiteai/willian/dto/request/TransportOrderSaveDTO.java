@@ -14,6 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class TransportOrderSaveDTO {
 
-    private List<Long> productsIds = new ArrayList<>();
+    private List<Long> purchaseIds = new ArrayList<>();
 
 }

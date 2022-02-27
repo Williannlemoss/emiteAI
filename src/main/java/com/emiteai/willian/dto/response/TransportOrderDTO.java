@@ -19,12 +19,9 @@ import java.util.List;
 public class TransportOrderDTO {
 
     private Long id;
-
     private List<PurchaseDTO> purchaseList = new ArrayList<>();
-
     private Boolean isSent;
 
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 }

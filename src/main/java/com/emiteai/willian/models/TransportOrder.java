@@ -27,7 +27,6 @@ public class TransportOrder {
     private Boolean isSent;
 
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 
     @PrePersist

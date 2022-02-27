@@ -22,12 +22,16 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-
     private final ProductConverter productConverter;
+
     @Override
     public List<ProductDTO> getAllProduct(){
+        List<Product> productList = productRepository.findAll();
 
-        return this.productConverter.toCollectionDTO(this.productRepository.findAll());
+        if(productList.isEmpty()){
+            throw new GlobalException("A lista está vazia", HttpStatus.BAD_REQUEST);
+        }
+        return productConverter.toCollectionDTO(productList);
     }
 
     @Override
@@ -36,14 +40,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Product getById(Long id){
+        return productRepository.findById(id).orElseThrow(() -> new GlobalException("Produto não encontrado", HttpStatus.NOT_FOUND));
+    }
+
+    @Override
     public ProductDTO saveProduct(ProductSaveDTO product){
-        return this.productConverter.toDto(this.productRepository.save(productConverter.toModelSave(product)));
+        return productConverter.toDto(this.productRepository.save(productConverter.toModelSave(product)));
     }
 
     @Override
     public Product updateProduct(Long id, ProductPutDTO product) {
 
-        Product productExistent = productRepository.findById(id).orElseThrow(() -> new GlobalException("Produto não encontrado", HttpStatus.NOT_FOUND));
+        Product productExistent = getById(id);
 
         if(product.getName() != null && product.getPrice() != null) {
             productExistent.setName(product.getName());
@@ -55,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<Void> deleteProduct(Long id) {
-        Product product = this.productRepository.getById(id);
+        Product product = getById(id);
         this.productRepository.deleteById(product.getId());
         return ResponseEntity.noContent().build();
     }

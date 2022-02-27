@@ -9,7 +9,9 @@ import com.emiteai.willian.repositories.PurchaseRepository;
 import com.emiteai.willian.repositories.TransportOrderRepository;
 import com.emiteai.willian.services.TransportOrderService;
 import com.emiteai.willian.utils.TransportOrderConverter;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,45 +27,51 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @EnableScheduling
+@Log4j2
 public class TransportOrderServiceImpl implements TransportOrderService {
 
-    Logger logger = LoggerFactory.getLogger(TransportOrderServiceImpl.class);
-
     private final TransportOrderRepository transportOrderRepository;
-
     private final PurchaseRepository purchaseRepository;
-
     private final TransportOrderConverter transportOrderConverter;
 
     @Override
     public List<TransportOrderDTO> getAllTransportOrder(){
-        List<TransportOrder> transportOrders = this.transportOrderRepository.findAll();
+        List<TransportOrder> transportOrders = transportOrderRepository.findAll();
 
         if (transportOrders.isEmpty()){
-            throw new GlobalException("Lista vazia", HttpStatus.NO_CONTENT);
+            throw new GlobalException("Ordem de serviço vazia", HttpStatus.BAD_REQUEST);
         }
 
         return this.transportOrderConverter.toCollectionDTO(transportOrders);
     }
 
+    private TransportOrder getById(Long id) {
+        return transportOrderRepository.findById(id).orElseThrow(() -> new GlobalException("Ordem de serviço não encontrada", HttpStatus.NOT_FOUND));
+    }
+
     @Override
     public TransportOrderDTO getTransportOrder(Long id){
-        return this.transportOrderConverter.toDTO(this.transportOrderRepository.findById(id).orElseThrow(() -> new GlobalException("Lista de pedidos não encontrada", HttpStatus.NOT_FOUND)));
+        return transportOrderConverter.toDTO(getById(id));
     }
 
     @Override
     public TransportOrderDTO saveTransportOrder(TransportOrderSaveDTO transportOrder){
-        TransportOrder transportOrderToBeCreated = this.transportOrderRepository.save(new TransportOrder());
+        TransportOrder transportOrderToBeCreated = transportOrderRepository.save(new TransportOrder());
 
-        for ( Long id: transportOrder.getProductsIds()) {
-            logger.error("" + id);
-            Purchase purchase = this.purchaseRepository.findById(id).orElseThrow();
-            purchase.setTransportOrder(transportOrderToBeCreated);
-            logger.error("id" + purchase.getId());
-            this.purchaseRepository.save(purchase);
+        for ( Long id: transportOrder.getPurchaseIds()) {
+            Optional<Purchase> purchase = purchaseRepository.findById(id);
+
+            if(purchase.isEmpty()){
+                deleteTransportOrder(transportOrderToBeCreated.getId());
+                throw new GlobalException("Lista de produtos não encontrada", HttpStatus.NOT_FOUND);
+            }
+
+            purchase.get().setTransportOrder(transportOrderToBeCreated);
+            purchaseRepository.save(purchase.get());
         }
 
-        return this.transportOrderConverter.toDTO(this.transportOrderRepository.save(transportOrderToBeCreated));
+        return transportOrderConverter
+            .toDTO(transportOrderRepository.save(transportOrderToBeCreated));
     }
 
     @Override
@@ -73,19 +81,18 @@ public class TransportOrderServiceImpl implements TransportOrderService {
 
     @Override
     public ResponseEntity<Void> deleteTransportOrder(Long id) {
-        TransportOrder transportOrder = this.transportOrderRepository.findById(id).orElseThrow();
-        this.transportOrderRepository.deleteById(transportOrder.getId());
+        TransportOrder transportOrder = getById(id);
+        transportOrderRepository.deleteById(transportOrder.getId());
         return ResponseEntity.noContent().build();
     }
 
     @Scheduled(fixedDelay = 10000)
-    private void teste(){
+    private void scheduledSendOrder(){
         List<Purchase> purchaseList = this.purchaseRepository.findByIsSentIsFalse();
         List<Long> listId = new ArrayList<>();
 
         if (!purchaseList.isEmpty()){
             for (Purchase purchase: purchaseList) {
-                logger.error("scheduling" + purchase.getId());
                 listId.add(purchase.getId());
                 purchase.setIsSent(true);
                 this.purchaseRepository.save(purchase);
