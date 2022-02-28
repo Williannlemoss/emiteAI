@@ -86,7 +86,7 @@ public class TransportOrderServiceImpl implements TransportOrderService {
         return ResponseEntity.noContent().build();
     }
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 600000)
     private void scheduledSendOrder(){
         List<Purchase> purchaseList = this.purchaseRepository.findByIsSentIsFalse();
         List<Long> listId = new ArrayList<>();

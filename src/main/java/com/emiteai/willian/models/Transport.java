@@ -14,20 +14,19 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "transportOrder")
-public class TransportOrder {
+@Entity(name = "transport")
+public class Transport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "transportOrder", cascade = CascadeType.ALL)
-    private List<Purchase> purchaseList = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Transport transport;
+    @OneToMany(mappedBy = "transport", cascade = CascadeType.ALL)
+    private List<TransportOrder> transportOrdersList = new ArrayList<>();
 
     private Boolean isSent;
+
+    private LocalDateTime tripCompleted;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
